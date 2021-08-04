@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hello World</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+      <h2>Hello remote index</h2>
+ 
+      <video id="video" playsinline autoplay muted ></video>
+      <script defer>
+
+// One RTCPeerConnection instance for each side
+const localConnection = new RTCPeerConnection();
+// On the remote side:
+const remoteConnection = new RTCPeerConnection();
+
+localConnection.addEventListener("icecandidate", async (event) => {
+    if (event.candidate) {
+        // Send event.candidate to the other side through e.g. WebSocket
+        try {
+            // On the remote side:
+            await remoteConnection.addIceCandidate(event.candidate);
+        } catch {
+            // handle error
+        }
+    }
+});
+// On the remote side:
+remoteConnection.addEventListener("icecandidate", async (event) => {
+    if (event.candidate) {
+        // Send event.candidate to the other side through e.g. WebSocket
+        try {
+            // On the local side:
+            await localConnection.addIceCandidate(event.candidate);
+           
+        } catch {
+            // handle error
+        }
+    }
+});
+
+const connect = async () => {
+    try {
+        const offer = await localConnection.createOffer();
+
+        await localConnection.setLocalDescription(offer);
+        /* Send offer to the other side through e.g. WebSocket
+            Then, on the remote side: */
+        await remoteConnection.setRemoteDescription(
+            localConnection.localDescription
+        );
+
+        const answer = await remoteConnection.createAnswer();
+
+        await remoteConnection.setLocalDescription(answer);
+        /* Send offer to the other side through e.g. WebSocket
+            Then, on the local side: */
+        await localConnection.setRemoteDescription(
+            remoteConnection.localDescription
+        );
+    } catch {
+    // handle errors
+    }
+};
+
+
+const startStreaming = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false,
+    });
+
+    for (const track of stream.getTracks()) {
+        localConnection.addTrack(track);
+    }
+};
+
+const startReceiving = () => {
+    const video = document.getElementById("video");
+    const stream = new MediaStream();
+
+    video.srcObject = stream;
+    remoteConnection.addEventListener("track", (event) => {
+        stream.addTrack(event.track);
+    });
+};
+
+const run = async () => {
+    await startStreaming();  
+    // On the remote side:
+    startReceiving();
+    // On both sides:
+    connect();
+};
+
+run();
+
+      </script>
+  </body>
+</html>

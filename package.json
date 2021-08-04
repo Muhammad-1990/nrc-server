@@ -1,0 +1,16 @@
+{
+  "name": "nrc-server",
+  "version": "1.0.0",
+  "description": "Novation Remote Control WebRTC singnaling sevrer.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Muhammad Ahmod",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.1.3"
+  }
+}
