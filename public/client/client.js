@@ -20,6 +20,7 @@ const localConnectionConfig = {
     ]
 };
 
+
 const localConnection = new RTCPeerConnection(localConnectionConfig);
 const dataChannel = localConnection.createDataChannel('mydatachannel');
 
@@ -29,6 +30,7 @@ dataChannel.onopen = () => {
 };
 
 dataChannel.onmessage = e => {
+    var xy = JSON.parse(e.data)
     console.log('received:', e.data);
 };
 
